@@ -42,8 +42,8 @@ public class FilmController {
     }
 
     @DeleteMapping("/{filmId}")
-    public Film deleteFilm(@PathVariable("filmId") Long filmId) throws ValidationException {
-        return filmStorage.deleteFilm(filmId);
+    public void deleteFilm(@PathVariable("filmId") Long filmId) throws ValidationException {
+        filmStorage.deleteFilm(filmId);
     }
 
     @GetMapping("/{filmId}")
@@ -57,8 +57,8 @@ public class FilmController {
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
-    public Film deleteLike(@PathVariable Long filmId, @PathVariable Long userId) {
-        return filmService.deleteLike(filmId, userId);
+    public void deleteLike(@PathVariable Long filmId, @PathVariable Long userId) {
+        filmService.deleteLike(filmId, userId);
     }
 
     @GetMapping("/popular")

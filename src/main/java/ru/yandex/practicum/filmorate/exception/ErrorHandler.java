@@ -5,38 +5,37 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice("ru.yandex.practicum.filmorate.controller")
+@RestControllerAdvice("ru.yandex.practicum.filmorate")
 public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleIncorrectParameterException(IncorrectCountException e) {
-        return new ErrorResponse("error", e.getMessage());
+    public ErrorResponse handleIncorrectParameterException(final IncorrectCountException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(ValidationException e) {
-        return new ErrorResponse("error", e.getMessage());
+    public ErrorResponse handleValidationException(final ValidationException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleFilmNotFoundException(FilmNotFoundException e) {
-        return new ErrorResponse("error", e.getMessage());
+    public ErrorResponse handleFilmNotFoundException(final FilmNotFoundException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleUserNotFoundException(UserNotFoundException e) {
-        return new ErrorResponse("error", e.getMessage());
+    public ErrorResponse handleUserNotFoundException(final UserNotFoundException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Throwable e) {
-        return new ErrorResponse("error",
-                e.getMessage()
+        return new ErrorResponse(e.getMessage()
         );
     }
 }

@@ -28,14 +28,14 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User addUser(User user) throws UserAlreadyExistException {
+    public User addUser(User user) {
         User user1 = new User();
         if (users.values().stream()
                 .filter(x -> x.getLogin().equalsIgnoreCase(user.getLogin()))
                 .anyMatch(x -> x.getEmail().equalsIgnoreCase(user.getEmail()))) {
             log.error("Пользователь '{}' с электронной почтой '{}' уже существует.",
                     user.getLogin(), user.getEmail());
-            throw new UserAlreadyExistException("This user already exists");
+            throw new ValidationException("This user already exists");
         }
         if (isValid(user)) {
             user.setId(createID());
@@ -47,14 +47,10 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User deleteUser(Long userId) {
-        User user = new User();
-        if (checkId(userId)) {
-            log.info("удаление фильма: {}", users.get(userId).toString());
-            user = users.get(userId);
-            users.remove(userId);
-        }
-        return user;
+    public void deleteUser(Long userId) {
+        checkId(userId);
+        log.info("удаление фильма: {}", users.get(userId).toString());
+        users.remove(userId);
     }
 
     @Override

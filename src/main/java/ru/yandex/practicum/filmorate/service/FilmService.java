@@ -38,8 +38,7 @@ public class FilmService {
         return film1;
     }
 
-    public Film deleteLike(Long filmId, Long userId) {
-        Film film1 = new Film();
+    public void deleteLike(Long filmId, Long userId) {
         if (isValidId(filmId, userId)) {
             Film film = filmStorage.getAllFilms().get(filmId);
             if (!(film.getIdLikeFilm().contains(userId))) {
@@ -49,9 +48,7 @@ public class FilmService {
                 );
             }
             film.getIdLikeFilm().remove(userId);
-            film1 = film;
         }
-        return film1;
     }
 
     public List<Film> getFilmsByCountLikes(Integer count) {

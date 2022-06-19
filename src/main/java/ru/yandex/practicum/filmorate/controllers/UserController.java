@@ -41,8 +41,8 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public User deleteUser(@PathVariable("userId") Long userId) throws ValidationException {
-        return userStorage.deleteUser(userId);
+    public void deleteUser(@PathVariable("userId") Long userId) throws ValidationException {
+        userStorage.deleteUser(userId);
     }
 
     @GetMapping("/{userId}")

@@ -11,10 +11,17 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class Film {
-    private Long id;
-    private Long duration;
     private String name;
     private String description;
     private LocalDate releaseDate;
+    private Long duration;
+    private Long id;
     private Set<Long> idLikeFilm;
+
+    public Film(String name, String description, LocalDate releaseDate, Long duration) {
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+    }
 }

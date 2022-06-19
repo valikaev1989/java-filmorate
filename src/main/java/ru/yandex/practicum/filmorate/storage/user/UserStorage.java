@@ -9,7 +9,7 @@ import java.util.Map;
 public interface UserStorage {
     User addUser(User user) throws UserAlreadyExistException, InvalidEmailException;
 
-    User deleteUser(Long userId);
+    void deleteUser(Long userId);
 
     User updateUser(User user);
 
