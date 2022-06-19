@@ -1,86 +1,71 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.IncorrectCountException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.models.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
-import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+
 
 @RestController
 @Slf4j
-@Validated
+@RequestMapping("/films")
 public class FilmController {
-    private Map<Long, Film> films = new HashMap<>();
-    private long idFilms = 0;
-    private static final LocalDate FILMOGRAPHY_START_DATE = LocalDate.of(1895, 12, 28);
-    private static final int MAX_DESCRIPTION_LEN = 200;
+    private final FilmStorage filmStorage;
+    private final FilmService filmService;
 
-    private Long generatedIDFilms() {
-        idFilms++;
-        return idFilms;
+    @Autowired
+    public FilmController(FilmStorage filmStorage, FilmService filmService) {
+        this.filmStorage = filmStorage;
+        this.filmService = filmService;
     }
 
-    private void createFilm(Film film) {
-        film.setId(generatedIDFilms());
-        films.put(film.getId(), film);
-    }
-
-    private static void validateFilm(Film film) throws ValidationException {
-        try {
-            if (film.getReleaseDate().isBefore(FILMOGRAPHY_START_DATE)) {
-                throw new ValidationException("Дата релиза не может быть раньше даты рождения кино");
-            }
-            if (film.getDescription().length() > MAX_DESCRIPTION_LEN) {
-                throw new ValidationException("Максимальная длина описания — 200 символов");
-            }
-        } catch (ValidationException e) {
-            log.error(e.getMessage());
-            throw new ValidationException(e.getMessage());
-        }
-    }
-
-    @GetMapping("/films")
+    @GetMapping
     public Collection<Film> getAllFilms() {
-        log.debug("Текущее количество пользователей: {}", films.size());
-        return films.values();
+        return filmStorage.getAllFilms().values();
     }
 
-    @PostMapping("/films")
-    public Film addFilm(@Valid @RequestBody Film film, BindingResult result) throws ValidationException {
-        if (result.hasErrors()) {
-            throw new ValidationException("error?как вывести это сообщение не знаю");
-        }
-        validateFilm(film);
-        createFilm(film);
-        log.debug(film.toString());
-        return film;
+    @PostMapping
+    public Film addFilm(@RequestBody Film film) throws ValidationException {
+        return filmStorage.addFilm(film);
     }
 
-    @PutMapping("/films")
-    public Film updateFilm(@Valid @RequestBody Film film, BindingResult result) throws ValidationException {
-        try {
-            if (result.hasErrors()) {
-                throw new ValidationException("error?как вывести это сообщение не знаю");
-            }
-            if (films.containsKey(film.getId())) {
-                films.put(film.getId(), film);
-                log.debug(film.toString());
-                return film;
-            } else {
-                createFilm(film);
-                log.debug(film.toString());
-                return film;
-            }
-        } catch (ValidationException ex) {
-            log.error(ex.getMessage());
-            throw new ValidationException(ex.getMessage());
+    @PutMapping
+    public Film updateFilm(@RequestBody Film film) throws ValidationException {
+        return filmStorage.updateFilm(film);
+    }
+
+    @DeleteMapping("/{filmId}")
+    public Film deleteFilm(@PathVariable("filmId") Long filmId) throws ValidationException {
+        return filmStorage.deleteFilm(filmId);
+    }
+
+    @GetMapping("/{filmId}")
+    public Film getFilm(@PathVariable Long filmId) {
+        return filmStorage.getFilm(filmId);
+    }
+
+    @PutMapping("/{filmId}/like/{userId}")
+    public Film addLike(@PathVariable Long filmId, @PathVariable Long userId) {
+        return filmService.addLike(filmId, userId);
+    }
+
+    @DeleteMapping("/{filmId}/like/{userId}")
+    public Film deleteLike(@PathVariable Long filmId, @PathVariable Long userId) {
+        return filmService.deleteLike(filmId, userId);
+    }
+
+    @GetMapping("/popular")
+    public List<Film> getFilmsByCountLikes(@RequestParam(defaultValue = "10") Integer count) {
+        if (count <= 0) {
+            throw new IncorrectCountException("Параметр count имеет отрицательное значение.");
         }
+        return filmService.getFilmsByCountLikes(count);
     }
 }
