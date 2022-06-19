@@ -10,8 +10,8 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,7 +30,7 @@ public class FilmService {
         Film film1 = new Film();
         if (isValidId(filmId, userId)) {
             Film film = filmStorage.getAllFilms().get(filmId);
-            Set<Long> likes = film.getIdLikeFilm();
+            HashSet<Long> likes = film.getIdLikeFilm();
             likes.add(userId);
             film.setIdLikeFilm(likes);
             film1 = film;

@@ -17,5 +17,5 @@ public class User {
     private String login;
     private String name;
     private LocalDate birthday;
-    private HashSet<Long> idFriendsList;
+    private HashSet<Long> idFriendsList = new HashSet<>();
 }
