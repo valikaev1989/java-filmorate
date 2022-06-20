@@ -18,7 +18,7 @@ class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    UserController controller;
+    private UserController controller;
 
     @Test
     public void test_shouldReturnOkStatus() throws Exception {

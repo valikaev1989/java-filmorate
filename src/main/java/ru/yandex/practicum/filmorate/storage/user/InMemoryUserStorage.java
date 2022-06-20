@@ -28,7 +28,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User addUser(User user) {
-        User user1 = new User();
         if (users.values().stream()
                 .filter(x -> x.getLogin().equalsIgnoreCase(user.getLogin()))
                 .anyMatch(x -> x.getEmail().equalsIgnoreCase(user.getEmail()))) {
@@ -36,13 +35,11 @@ public class InMemoryUserStorage implements UserStorage {
                     user.getLogin(), user.getEmail());
             throw new ValidationException("This user already exists");
         }
-        if (isValid(user)) {
+        isValid(user);
             user.setId(createID());
             users.put(user.getId(), user);
             log.info("Добавлен User: {}", user);
-            user1 = user;
-        }
-        return user1;
+        return user;
     }
 
     @Override
@@ -54,26 +51,21 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
-        User user1 = new User();
-        if (isValid(user) && checkId(user.getId())) {
-            users.put(user.getId(), user);
-            log.info("Данные пользователя '{}' обновлены", user.getLogin());
-            user1 = user;
-        }
-        return user1;
+        isValid(user);
+        checkId(user.getId());
+        users.put(user.getId(), user);
+        log.info("Данные пользователя '{}' обновлены", user.getLogin());
+        return user;
     }
 
 
     @Override
     public User getUser(Long userId) {
-        User user = new User();
-        if (checkId(userId)) {
-            user = users.get(userId);
-        }
-        return user;
+        checkId(userId);
+        return users.get(userId);
     }
 
-    private boolean isValid(User user) throws ValidationException {
+    private void isValid(User user) throws ValidationException {
         if (checkEmail(user)) {
             log.error("Некорректный адрес электронной почты");
             throw new ValidationException("Invalid email");
@@ -85,17 +77,14 @@ public class InMemoryUserStorage implements UserStorage {
             throw new ValidationException("invalid birthday");
         } else {
             if (user.getName().isBlank()) user.setName(user.getLogin());
-            return true;
         }
     }
 
-    private boolean checkId(Long userId) {
+    private void checkId(Long userId) {
         if (userId == null || !users.containsKey(userId)) {
             log.error("пользователь с id '{}' не найден в списке InMemoryUserStorage!", userId);
             throw new UserNotFoundException(String.format("пользователь с id '%d' не найден в InMemoryUserStorage.",
                     userId));
-        } else {
-            return true;
         }
     }
 

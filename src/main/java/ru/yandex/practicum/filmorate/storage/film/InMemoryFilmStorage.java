@@ -31,17 +31,13 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film getFilm(Long filmId) {
-        Film film = new Film();
-        if (checkFilmId(filmId)) {
-            log.info("запрошен фильм: {}", films.get(filmId).toString());
-            film = films.get(filmId);
-        }
-        return film;
+        checkFilmId(filmId);
+        log.info("запрошен фильм: {}", films.get(filmId).toString());
+        return films.get(filmId);
     }
 
     @Override
     public Film addFilm(Film film) {
-        Film film1 = new Film();
         if (films.values().stream()
                 .filter(x -> x.getName().equalsIgnoreCase(film.getName()))
                 .anyMatch(x -> x.getReleaseDate().equals(film.getReleaseDate()))) {
@@ -50,13 +46,13 @@ public class InMemoryFilmStorage implements FilmStorage {
                     film.getReleaseDate()
             );
             throw new ValidationException("This film already exists");
-        } else if (isValid(film)) {
-            film.setId(generatedIDFilms());
-            films.put(film.getId(), film);
-            log.info("Добавлен фильм: {}", film);
-            film1 = film;
         }
-        return film1;
+        isValid(film);
+        film.setId(generatedIDFilms());
+        films.put(film.getId(), film);
+        log.info("Добавлен фильм: {}", film);
+        return film;
+
     }
 
     @Override
@@ -69,16 +65,14 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        Film film1 = new Film();
-        if (isValid(film) && checkFilmId(film.getId())) {
-            films.put(film.getId(), film);
-            log.info("Отредактирован фильм '{}'", film.getName());
-            film1 = film;
-        }
-        return film1;
+        isValid(film);
+        checkFilmId(film.getId());
+        films.put(film.getId(), film);
+        log.info("Отредактирован фильм '{}'", film.getName());
+        return film;
     }
 
-    private boolean isValid(Film film) throws ValidationException {
+    private void isValid(Film film) throws ValidationException {
         if (film.getName().isBlank()) {
             log.error("Название фильма не может быть пустым");
             throw new ValidationException("invalid film name");
@@ -91,17 +85,13 @@ public class InMemoryFilmStorage implements FilmStorage {
         } else if (film.getDuration() <= 0) {
             log.error("Продолжительность фильма должна быть положительной");
             throw new ValidationException("invalid duration");
-        } else {
-            return true;
         }
     }
 
-    private boolean checkFilmId(Long filmId) {
+    private void checkFilmId(Long filmId) {
         if (filmId == null || !films.containsKey(filmId)) {
             log.error("Фильм с id '{}' не найден в списке InMemoryFilmStorage!", filmId);
             throw new FilmNotFoundException(String.format("Фильм с id '%d' не найден в InMemoryFilmStorage.", filmId));
-        } else {
-            return true;
         }
     }
 }

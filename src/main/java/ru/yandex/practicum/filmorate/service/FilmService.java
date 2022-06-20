@@ -27,28 +27,26 @@ public class FilmService {
     }
 
     public Film addLike(Long filmId, Long userId) {
-        Film film1 = new Film();
-        if (isValidId(filmId, userId)) {
-            Film film = filmStorage.getAllFilms().get(filmId);
-            HashSet<Long> likes = film.getIdLikeFilm();
-            likes.add(userId);
-            film.setIdLikeFilm(likes);
-            film1 = film;
-        }
-        return film1;
+        isValidId(filmId, userId);
+        Film film = filmStorage.getAllFilms().get(filmId);
+        HashSet<Long> likes = film.getIdLikeFilm();
+        likes.add(userId);
+        film.setIdLikeFilm(likes);
+        return film;
+
+
     }
 
     public void deleteLike(Long filmId, Long userId) {
-        if (isValidId(filmId, userId)) {
-            Film film = filmStorage.getAllFilms().get(filmId);
-            if (!(film.getIdLikeFilm().contains(userId))) {
-                log.error("Пользователь с id '{}' отсутствует в списке Like фильма.", userId);
-                throw new FilmNotFoundException(
-                        String.format("Пользователь с id '%d' отсутствует в списке Like фильма.", userId)
-                );
-            }
-            film.getIdLikeFilm().remove(userId);
+        isValidId(filmId, userId);
+        Film film = filmStorage.getAllFilms().get(filmId);
+        if (!(film.getIdLikeFilm().contains(userId))) {
+            log.error("Пользователь с id '{}' отсутствует в списке Like фильма.", userId);
+            throw new FilmNotFoundException(
+                    String.format("Пользователь с id '%d' отсутствует в списке Like фильма.", userId)
+            );
         }
+        film.getIdLikeFilm().remove(userId);
     }
 
     public List<Film> getFilmsByCountLikes(Integer count) {
@@ -58,15 +56,13 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
-    private boolean isValidId(Long filmId, Long userId) {
+    private void isValidId(Long filmId, Long userId) {
         if (filmId == null || !filmStorage.getAllFilms().containsKey(filmId)) {
             log.error("Фильм с id '{}' не найден в списке FilmService!", filmId);
             throw new FilmNotFoundException(String.format("Фильм с id '%d' не найден в FilmService.", filmId));
         } else if (userId == null || !userStorage.getAllUsers().containsKey(userId)) {
             log.error("пользователь с id '{}' не найден в списке FilmService!", userId);
             throw new UserNotFoundException(String.format("пользователь с id '%d' не найден в FilmService.", userId));
-        } else {
-            return true;
         }
     }
 }
