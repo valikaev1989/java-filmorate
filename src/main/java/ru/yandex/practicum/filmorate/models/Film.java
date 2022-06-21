@@ -2,27 +2,25 @@ package ru.yandex.practicum.filmorate.models;
 
 import lombok.*;
 
-import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Film {
-    @Positive(message = "id should be positive ")
-    private Long id;
-
-    @Positive(message = "duration should be positive")
-    Long duration;
-
-    @NotEmpty(message = "name can't be empty")
-    @NotBlank(message = "name can't be empty")
     private String name;
-
-    @NotNull(message = "description can't be null")
     private String description;
-
-    @NotNull(message = "releaseDate can't be null")
     private LocalDate releaseDate;
+    private Integer duration;
+    private Long id;
+    private HashSet<Long> idLikeFilm = new HashSet<>();
+
+    public Film(String name, String description, LocalDate releaseDate, Integer duration) {
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+    }
 }

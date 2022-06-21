@@ -1,86 +1,72 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.InvalidEmailException;
+import ru.yandex.practicum.filmorate.exception.UserAlreadyExistException;
 import ru.yandex.practicum.filmorate.models.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import javax.validation.Valid;
 import javax.validation.ValidationException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @Slf4j
-@Validated
+@RequestMapping("/users")
 public class UserController {
-    private Map<Long, User> users = new HashMap<>();
-    private long idUsers = 0;
+    private final UserStorage userStorage;
+    private final UserService userService;
 
-    private Long generatedIDUsers() {
-        idUsers++;
-        return idUsers;
+    @Autowired
+    public UserController(UserStorage userStorage, UserService userService) {
+        this.userStorage = userStorage;
+        this.userService = userService;
     }
 
-    private void createUser(User user) {
-        user.setId(generatedIDUsers());
-        users.put(user.getId(), user);
+    @GetMapping()
+    public List<User> getAllUsers() {
+        return new ArrayList<>(userStorage.getAllUsers().values());
     }
 
-    private static void validateUser(User user) {
-        try {
-            if (user.getName().isBlank() || user.getName().isEmpty()) {
-                user.setName(user.getLogin());
-            }
-        } catch (ValidationException ex) {
-            log.error(ex.getMessage());
-            throw new ValidationException(ex.getMessage());
-        }
+    @PostMapping()
+    public User addUser(@RequestBody User user) throws ValidationException, UserAlreadyExistException, InvalidEmailException {
+        return userStorage.addUser(user);
     }
 
-    @GetMapping("/users")
-    public Collection<User> getAllUsers() {
-        log.debug("Текущее количество пользователей: {}", users.size());
-        return users.values();
+    @PutMapping()
+    public User updateUser(@RequestBody User user) throws ValidationException {
+        return userStorage.updateUser(user);
     }
 
-    @PostMapping("/users")
-    public User addUser(@Valid @RequestBody User user, BindingResult result) {
-        try {
-            if (result.hasErrors()) {
-                throw new ValidationException("error?как вывести это сообщение не знаю");
-            }
-            validateUser(user);
-            createUser(user);
-            log.debug(user.toString());
-            return user;
-        } catch (ValidationException ex) {
-            log.error(ex.getMessage());
-            throw new ValidationException(ex.getMessage());
-        }
+    @DeleteMapping("/{userId}")
+    public void deleteUser(@PathVariable("userId") Long userId) throws ValidationException {
+        userStorage.deleteUser(userId);
     }
 
-    @PutMapping("/users")
-    public User updateUser(@Valid @RequestBody User user, BindingResult result) {
-        try {
-            if (result.hasErrors()) {
-                throw new ValidationException("error?как вывести это сообщение не знаю");
-            }
-            validateUser(user);
-            if (users.containsKey(user.getId())) {
-                users.put(user.getId(), user);
-                log.debug(user.toString());
-                return user;
-            } else {
-                createUser(user);
-                log.debug(user.toString());
-                return user;
-            }
-        } catch (ValidationException ex) {
-            log.error(ex.getMessage());
-            throw new ValidationException(ex.getMessage());
-        }
+    @GetMapping("/{userId}")
+    public User getUser(@PathVariable Long userId) {
+        return userStorage.getUser(userId);
+    }
+
+    @PutMapping("/{userId}/friends/{friendId}")
+    public User addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+        return userService.addFriend(userId, friendId);
+    }
+
+    @DeleteMapping("/{userId}/friends/{friendId}")
+    public void deleteFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+        userService.deleteFriend(userId, friendId);
+    }
+
+    @GetMapping("/{userId}/friends")
+    public List<User> getFriends(@PathVariable Long userId) {
+        return userService.getFriends(userId);
+    }
+
+    @GetMapping("/{userId}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable Long userId, @PathVariable Long otherId) {
+        return userService.getCommonFriends(userId, otherId);
     }
 }
