@@ -10,11 +10,11 @@ import java.util.HashSet;
 @AllArgsConstructor
 @Builder
 public class Film {
+    private Long id;
     private String name;
     private String description;
     private LocalDate releaseDate;
     private Integer duration;
-    private Long id;
     private HashSet<Long> idLikeFilm = new HashSet<>();
 
     public Film(String name, String description, LocalDate releaseDate, Integer duration) {
