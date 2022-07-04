@@ -13,7 +13,9 @@ public class User {
     private Long id;
     private String email;
     private String login;
-    private String name;
+    private String firstName;
+    private String lastName;
     private LocalDate birthday;
     private HashSet<Long> idFriendsList = new HashSet<>();
+    private int friendStatusId = 1;
 }
