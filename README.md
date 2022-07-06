@@ -52,4 +52,4 @@ LEFT JOIN friends_status as fs ON fu.friend_id = fs.friend_id
 LEFT JOIN status as s ON fs.status_id = s.status_id
 GROUP BY u.name;
 ```
-[связи между данными](C:\Users\valik\Desktop\QuickDBD-filmogram Diagram.png "Diagram")
+![связи между данными](C:\Users\valik\Desktop\QuickDBD-filmogram Diagram.svg)
