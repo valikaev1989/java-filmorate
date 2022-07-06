@@ -53,4 +53,4 @@ LEFT JOIN status as s ON fs.status_id = s.status_id
 GROUP BY u.name;
 ```
 
-<img alt="связи между данными" src="QuickDBD-filmogram Diagram.svg" title="Диаграмма"/>
+<img alt="Связи базы данных" src="C:\Users\valik\Desktop\dev\java-filmorate\QuickDBD-filmogram Diagram.png" title="Диаграмма"/>
