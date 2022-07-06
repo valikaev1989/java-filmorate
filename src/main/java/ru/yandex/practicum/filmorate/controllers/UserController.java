@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.InvalidEmailException;
 import ru.yandex.practicum.filmorate.exception.UserAlreadyExistException;
-import ru.yandex.practicum.filmorate.models.User.User;
+import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 

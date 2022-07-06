@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.models.User;
+package ru.yandex.practicum.filmorate.models;
 
 import lombok.*;
 
@@ -13,9 +13,7 @@ public class User {
     private Long id;
     private String email;
     private String login;
-    private String firstName;
-    private String lastName;
+    private String name;
     private LocalDate birthday;
     private HashSet<Long> idFriendsList = new HashSet<>();
-    private int friendStatusId = 1;
 }

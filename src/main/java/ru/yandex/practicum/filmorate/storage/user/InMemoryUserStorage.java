@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.models.User.User;
+import ru.yandex.practicum.filmorate.models.User;
 
 import java.time.LocalDate;
 import java.util.HashMap;
