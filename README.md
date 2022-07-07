@@ -24,7 +24,7 @@ FROM film;
 ```
 3. получение *"N"* популярных фильмов
 ``` java
-SELECT *, f.name as movie,
+SELECT *, f.name as movie, //* остальные поля из таблицы film
 r.rating_id as film_rating
 FROM film as f
 LEFT JOIN genre AS g on f.genre_id = g.genre_id
@@ -36,21 +36,11 @@ LIMIT "количество фильмов в списке";
 4. выдать общих друзей
 ``` java
 SELECT u.name
-FROM friends_user."friend_id" AS f1
-JOIN friends_user."friend_id" AS f2 ON f.friend_id = f2.friend_id
+FROM friendship."friend_id" AS f1
+JOIN friendship."friend_id" AS f2 ON f.friend_id = f2.friend_id
 JOIN user AS u ON f.friend_id = u.user_id
 GROUP BY u.name;
 ```
-5. выдать статус подтверждения дружбы
-``` java
-SELECT u.name,
-f.friens_user,
-s.name
-FROM user as u
-LEFT JOIN friends_user AS fu ON u.user_id = fu.user_id
-LEFT JOIN friends_status as fs ON fu.friend_id = fs.friend_id
-LEFT JOIN status as s ON fs.status_id = s.status_id
-GROUP BY u.name;
-```
+
 
 <img alt="Связи базы данных" src="QuickDBD-filmogram Diagram.png" title="Диаграмма"/>
