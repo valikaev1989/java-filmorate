@@ -66,8 +66,15 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void addFriends(int userId, int friendsId) {
-
+    public void addFriends(int userId, int friendId) {
+        userValidator.validateIdUser(userId);
+        userValidator.validateIdUser(friendId);
+        User user = users.get(userId);
+        User friend = users.get(friendId);
+        HashSet<Integer> userFriends = user.getIdFriendsList();
+        HashSet<Integer> friendFriends = friend.getIdFriendsList();
+        userFriends.add(friendId);
+        friendFriends.add(userId);
     }
 
     @Override
@@ -79,22 +86,22 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public HashSet<User> findAllFriends(Integer userId) {
+    public List<User> findAllFriends(Integer userId) {
         userValidator.validateIdUser(userId);
-        return (HashSet<User>) users.get(userId).getIdFriendsList().stream()
+        return users.get(userId).getIdFriendsList().stream()
                 .map(users::get)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     @Override
-    public HashSet<User> findCommonFriends(int userId, int otherId) {
+    public List<User> findCommonFriends(int userId, int otherId) {
         User user = users.get(userId);
         User otherUser = users.get(otherId);
         Set<Integer> userFriends = user.getIdFriendsList();
         Set<Integer> otherUserFriends = otherUser.getIdFriendsList();
         return userFriends.stream()
                 .filter(otherUserFriends::contains)
-                .map(i -> users.get(i))
+                .map(users::get)
                 .collect(Collectors.toList());
     }
 }

@@ -4,7 +4,7 @@ import ru.yandex.practicum.filmorate.exception.InvalidEmailException;
 import ru.yandex.practicum.filmorate.exception.UserAlreadyExistException;
 import ru.yandex.practicum.filmorate.models.User;
 
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 public interface UserStorage {
@@ -22,7 +22,7 @@ public interface UserStorage {
 
     void deleteFriends(int userId, int friendsId);
 
-    HashSet<User> findAllFriends(Integer userId);
+    List<User> findAllFriends(Integer userId);
 
-    HashSet<User> findCommonFriends(int userId, int otherId);
+    List<User> findCommonFriends(int userId, int otherId);
 }

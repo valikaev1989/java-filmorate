@@ -44,6 +44,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User addUser(User user)  {
         userValidator.validateUser(user);
+
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("USERS")
                 .usingGeneratedKeyColumns("USER_ID");
@@ -64,7 +65,7 @@ public class UserDbStorage implements UserStorage {
                     sqlRow.getString("name"),
                     sqlRow.getString("login"),
                     sqlRow.getString("email"),
-                    sqlRow.getDate("birthday").toLocalDate());
+                    Objects.requireNonNull(sqlRow.getDate("birthday")).toLocalDate());
             user.setId(sqlRow.getInt("user_id"));
             HashSet<Integer> friends = uploadFriends(userId, true);
             HashSet<Integer> follows = uploadFriends(userId, false);
@@ -111,7 +112,6 @@ public class UserDbStorage implements UserStorage {
         userValidator.validateIdUser(userId);
         userValidator.validateIdUser(friendsId);
         User user = getUser(userId);
-        User friend = getUser(friendsId);
         HashSet<Integer> friendsUser = user.getIdFriendsList();
         friendsUser.add(friendsId);
         updateUser(user);
@@ -126,11 +126,11 @@ public class UserDbStorage implements UserStorage {
         updateUser(getUser(friendsId));
     }
     @Override
-    public HashSet<User> findAllFriends(Integer userId) {
+    public List<User> findAllFriends(Integer userId) {
         userValidator.validateIdUser(userId);
         User user = getUser(userId);
         HashSet<Integer> allFriend = user.getIdFriendsList();
-        HashSet<User> friends = new HashSet<>();
+        List<User> friends = new ArrayList<>();
         if (!allFriend.isEmpty()) {
             for (Integer id : allFriend) {
                 friends.add(getUser(id));
@@ -139,10 +139,10 @@ public class UserDbStorage implements UserStorage {
         return friends;
     }
     @Override
-    public HashSet<User> findCommonFriends(int userId, int otherId) {
+    public List<User> findCommonFriends(int userId, int otherId) {
         userValidator.validateIdUser(userId);
         userValidator.validateIdUser(otherId);
-        HashSet<User> commonFriends = new HashSet<>();
+        List<User> commonFriends = new ArrayList<>();
         User user = getUser(userId);
         User otherUser = getUser(otherId);
         for (Integer friend : user.getIdFriendsList()) {

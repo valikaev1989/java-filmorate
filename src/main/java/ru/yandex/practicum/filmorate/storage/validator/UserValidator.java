@@ -7,4 +7,5 @@ public interface UserValidator {
     void validateIdUser(Integer userId);
 
     void validateUser(User user);
+    void isValidExistFilm(User user);
 }

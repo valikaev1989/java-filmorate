@@ -33,6 +33,11 @@ public class ValidUser extends InMemoryUserStorage implements UserValidator {
         validateEmailUser(user);
     }
 
+    @Override
+    public void isValidExistFilm(User user) {
+
+    }
+
     public void validateLoginUser(User user) {
         if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
             log.error("Логин не должен быть пустым и не должен содержать пробелов");

@@ -4,12 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -23,8 +21,7 @@ public class UserService {
     }
 
     public Map<Integer, User> getAllUsers() {
-        Map<Integer, User> allUsers = userStorage.getAllUsers();
-        return allUsers;
+        return userStorage.getAllUsers();
     }
 
     public User addUser(User user) {
@@ -50,8 +47,21 @@ public class UserService {
         return user1;
     }
 
-    public User addFriend(Integer userId, Integer friendId) {
-        userStorage.add
-        return friend;
+    public void addFriend(Integer userId, Integer friendId) {
+        userStorage.addFriends(userId, friendId);
+        log.info("addFriend: {}" + userStorage.getUser(userId).getIdFriendsList().contains(friendId), friendId);
+    }
+
+    public void deleteFriends(int userId, int friendId) {
+        userStorage.deleteFriends(userId, friendId);
+        log.info("deleteFriends: {}" + !userStorage.getUser(userId).getIdFriendsList().contains(friendId), friendId);
+    }
+
+    public List<User> getAllFriends(Integer userId) {
+        return userStorage.findAllFriends(userId);
+    }
+
+    public List<User> getCommonFriends(int userId, int otherId) {
+        return userStorage.findCommonFriends(userId, otherId);
     }
 }

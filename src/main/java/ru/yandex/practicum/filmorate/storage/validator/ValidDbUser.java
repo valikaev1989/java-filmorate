@@ -7,7 +7,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.User;
 
 @Component
@@ -36,6 +35,8 @@ public class ValidDbUser extends ValidUser implements UserValidator {
         changeNameIfEmpty(user);
         validateEmailUser(user);
     }
+
+    @Override
     public void isValidExistFilm(User user) {
         SqlRowSet sqlRow = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM USERS WHERE name = ? AND EMAIL = ?",
