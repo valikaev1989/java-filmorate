@@ -41,4 +41,5 @@ JOIN friendship."friend_id" AS f2 ON f.friend_id = f2.friend_id
 JOIN user AS u ON f.friend_id = u.user_id
 GROUP BY u.name;
 ```
-<img alt="Связи базы данных" src="QuickDBD-filmogram Diagram.png" title="Диаграмма"/>
+
+<img src="C:\Users\valik\Desktop\dev\java-filmorate\src\main\resources\QuickDBD-filmogram Diagram.png"/>

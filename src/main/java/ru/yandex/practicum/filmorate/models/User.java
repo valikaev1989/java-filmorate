@@ -10,10 +10,25 @@ import java.util.HashSet;
 @AllArgsConstructor
 @Builder
 public class User {
-    private Long id;
-    private String email;
-    private String login;
+    private Integer id;
     private String name;
+    private String login;
+    private String email;
     private LocalDate birthday;
-    private HashSet<Long> idFriendsList = new HashSet<>();
+    private HashSet<Integer> idFriendsList = new HashSet<>();
+
+    public User(String name, String login, String email, LocalDate birthday) {
+        this.email = email;
+        this.login = login;
+        this.name = name;
+        this.birthday = birthday;
+    }
+
+    public User(Integer id, String name, String login, String email, LocalDate birthday) {
+        this.id = id;
+        this.email = email;
+        this.login = login;
+        this.name = name;
+        this.birthday = birthday;
+    }
 }

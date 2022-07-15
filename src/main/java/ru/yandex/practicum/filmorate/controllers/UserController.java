@@ -41,32 +41,32 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable("userId") Long userId) throws ValidationException {
+    public void deleteUser(@PathVariable("userId") Integer userId) throws ValidationException {
         userStorage.deleteUser(userId);
     }
 
     @GetMapping("/{userId}")
-    public User getUser(@PathVariable Long userId) {
+    public User getUser(@PathVariable Integer userId) {
         return userStorage.getUser(userId);
     }
 
     @PutMapping("/{userId}/friends/{friendId}")
-    public User addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+    public User addFriend(@PathVariable Integer userId, @PathVariable Integer friendId) {
         return userService.addFriend(userId, friendId);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
-    public void deleteFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+    public void deleteFriend(@PathVariable Integer userId, @PathVariable Integer friendId) {
         userService.deleteFriend(userId, friendId);
     }
 
     @GetMapping("/{userId}/friends")
-    public List<User> getFriends(@PathVariable Long userId) {
+    public List<User> getFriends(@PathVariable Integer userId) {
         return userService.getFriends(userId);
     }
 
     @GetMapping("/{userId}/friends/common/{otherId}")
-    public List<User> getCommonFriends(@PathVariable Long userId, @PathVariable Long otherId) {
+    public List<User> getCommonFriends(@PathVariable Integer userId, @PathVariable Integer otherId) {
         return userService.getCommonFriends(userId, otherId);
     }
 }
