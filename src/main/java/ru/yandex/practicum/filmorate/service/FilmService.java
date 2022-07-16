@@ -36,9 +36,12 @@ public class FilmService {
     }
 
     public List<Film> getFilmsByCountLikes(Integer count) {
-        return filmStorage.getAllFilms().values().stream()
-                .sorted(Comparator.comparingInt(f0 -> f0.getIdLikeFilm().size() * -1))
-                .limit(count)
+        List<Film>allFilms =new ArrayList<>(filmStorage.getAllFilms().values());
+        return allFilms.stream()
+                .sorted((o1, o2) -> {
+                    int result = Integer.compare(o1.getIdLikeFilm().size(), o2.getIdLikeFilm().size());
+                    return result * -1;
+                }).limit(count)
                 .collect(Collectors.toList());
     }
 

@@ -13,13 +13,9 @@ import ru.yandex.practicum.filmorate.models.Mpa;
 import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -38,20 +34,12 @@ class FilmoRateApplicationTests {
         assertEquals(user, userStorage.getUser(user.getId()));
         Film film = new Film("film1", "some things", LocalDate.of(1999, 6, 15), 165, new Mpa(2, null));
         HashSet<Genre> genres = new HashSet<>();
-        genres.add(new Genre(3));
-        genres.add(new Genre(6));
+        genres.add(new Genre(3,null));
+        genres.add(new Genre(6,null));
         film.setGenres(genres);
         filmStorage.addFilm(film);
         System.out.println(filmStorage.getFilm(1));
         assertEquals(film, filmStorage.getFilm(1));
-    }
-
-    public void countLike(Film film, int i) {
-        HashSet<Integer> like = new HashSet<>();
-        for (int j = 0; j < i; j++) {
-            like.add(j);
-        }
-        film.setIdLikeFilm(like);
     }
 
     @Test
