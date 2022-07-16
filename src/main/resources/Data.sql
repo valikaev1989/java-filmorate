@@ -1,20 +1,19 @@
-DROP TABLE IF EXISTS FILMS_LIKES,FILM_RATINGS,GENRES,FILMS_GENRES,FILMS,USERS_FRIENDS,USERS cascade ;
+DROP TABLE IF EXISTS FILMS_LIKES,FILM_RATINGS,GENRES,FILMS_GENRES,FILMS,USERS_FRIENDS,USERS cascade;
 create table IF NOT EXISTS FILM_RATINGS
 (
-    RATING_ID   INTEGER auto_increment,
-    NAME CHARACTER VARYING(50),
+    RATING_ID INTEGER auto_increment,
+    NAME      CHARACTER VARYING(50),
     constraint FILMS_RATINGS_PK
         primary key (RATING_ID)
 );
-
 create table IF NOT EXISTS FILMS
 (
-    FILM_ID           INTEGER auto_increment,
-    NAME         CHARACTER VARYING(50)  not null,
-    DESCRIPTION  CHARACTER VARYING(200) not null,
-    RELEASE_DATE DATE                   not null,
-    DURATION     INTEGER                not null,
-    FILM_RATING_ID       INTEGER,
+    FILM_ID        INTEGER auto_increment,
+    NAME           CHARACTER VARYING(50)  not null,
+    DESCRIPTION    CHARACTER VARYING(200) not null,
+    RELEASE_DATE   DATE                   not null,
+    DURATION       INTEGER                not null,
+    FILM_RATING_ID INTEGER,
     constraint FILMS_PK
         primary key (FILM_ID),
     constraint FILMS_FILMS_RATINGS_RATING_ID_FK
@@ -23,15 +22,15 @@ create table IF NOT EXISTS FILMS
 
 create table IF NOT EXISTS GENRES
 (
-    GENRE_ID   INTEGER auto_increment,
-    NAME CHARACTER VARYING(50),
+    GENRE_ID INTEGER auto_increment,
+    NAME     CHARACTER VARYING(50),
     constraint FILMS_GENRES_PK
         primary key (GENRE_ID)
 );
 
 create table IF NOT EXISTS FILMS_GENRES
 (
-    FILM_ID    INTEGER,
+    FILM_ID       INTEGER,
     FILM_GENRE_ID INTEGER,
     constraint FILMS_GENRES_FILMS_FILM_ID_FK
         foreign key (FILM_ID) references FILMS,
@@ -41,7 +40,7 @@ create table IF NOT EXISTS FILMS_GENRES
 
 create table IF NOT EXISTS USERS
 (
-    USER_ID       INTEGER auto_increment,
+    USER_ID  INTEGER auto_increment,
     NAME     CHARACTER VARYING(50),
     BIRTHDAY DATE                  not null,
     LOGIN    CHARACTER VARYING(50) not null,
