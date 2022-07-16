@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.storage.validator.UserValidator;
 import ru.yandex.practicum.filmorate.storage.validator.ValidUser;
@@ -28,14 +27,9 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User addUser(User user) {
-        if (users.values().stream()
-                .filter(x -> x.getLogin().equalsIgnoreCase(user.getLogin()))
-                .anyMatch(x -> x.getEmail().equalsIgnoreCase(user.getEmail()))) {
-            log.error("Пользователь '{}' с электронной почтой '{}' уже существует.",
-                    user.getLogin(), user.getEmail());
-            throw new ValidationException("This user already exists");
-        }
+        userValidator.setMapFilms(users);
         userValidator.validateUser(user);
+        userValidator.isValidExistFilm(user);
         user.setId(createID());
         users.put(user.getId(), user);
         log.info("Добавлен User: {}", user);
@@ -44,6 +38,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void deleteUser(Integer userId) {
+        userValidator.setMapFilms(users);
         userValidator.validateIdUser(userId);
         log.info("удаление фильма: {}", users.get(userId).toString());
         users.remove(userId);
@@ -51,6 +46,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
+        userValidator.setMapFilms(users);
         userValidator.validateUser(user);
         userValidator.validateIdUser(user.getId());
         users.put(user.getId(), user);
@@ -61,12 +57,14 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User getUser(Integer userId) {
+        userValidator.setMapFilms(users);
         userValidator.validateIdUser(userId);
         return users.get(userId);
     }
 
     @Override
     public void addFriends(int userId, int friendId) {
+        userValidator.setMapFilms(users);
         userValidator.validateIdUser(userId);
         userValidator.validateIdUser(friendId);
         User user = users.get(userId);
@@ -79,6 +77,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void deleteFriends(int userId, int friendId) {
+        userValidator.setMapFilms(users);
         userValidator.validateIdUser(userId);
         userValidator.validateIdUser(friendId);
         users.get(userId).getIdFriendsList().remove(friendId);
@@ -87,6 +86,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public List<User> findAllFriends(Integer userId) {
+        userValidator.setMapFilms(users);
         userValidator.validateIdUser(userId);
         return users.get(userId).getIdFriendsList().stream()
                 .map(users::get)
@@ -95,6 +95,9 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public List<User> findCommonFriends(int userId, int otherId) {
+        userValidator.setMapFilms(users);
+        userValidator.validateIdUser(userId);
+        userValidator.validateIdUser(otherId);
         User user = users.get(userId);
         User otherUser = users.get(otherId);
         Set<Integer> userFriends = user.getIdFriendsList();

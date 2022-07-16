@@ -5,15 +5,17 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.models.Film;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Component
-public class ValidFilm extends InMemoryFilmStorage implements FilmValidator {
+public class ValidFilm implements FilmValidator {
     private static final LocalDate FILMOGRAPHY_START_DATE = LocalDate.of(1895, 12, 28);
     private static final int MAX_DESCRIPTION_LEN = 200;
+    private Map<Integer, Film> films = new HashMap<>();
 
     @Override
     public void validateFilm(Film film) {
@@ -25,8 +27,13 @@ public class ValidFilm extends InMemoryFilmStorage implements FilmValidator {
     }
 
     @Override
-    public void validateFilmId(Integer filmId) {
-        if (filmId == null || !getAllFilms().containsKey(filmId)) {
+    public void setMapFilms(Map<Integer, Film> allFilms) {
+        this.films = allFilms;
+    }
+
+    @Override
+    public void validateFilmId( Integer filmId) {
+        if (filmId == null || !films.containsKey(filmId)) {
             log.error("Фильм с id '{}' не найден в списке InMemoryFilmStorage!", filmId);
             throw new FilmNotFoundException(String.format("Фильм с id '%d' не найден в InMemoryFilmStorage.", filmId));
         }
@@ -61,8 +68,8 @@ public class ValidFilm extends InMemoryFilmStorage implements FilmValidator {
     }
 
     @Override
-    public void isValidExistFilm(Film film) {
-        if (getAllFilms().values().stream()
+    public void isValidExistFilm( Film film) {
+        if (films.values().stream()
                 .filter(x -> x.getName().equalsIgnoreCase(film.getName()))
                 .anyMatch(x -> x.getReleaseDate().equals(film.getReleaseDate()))) {
             log.error("Фильм '{}' с датой релиза '{}' уже добавлен.",

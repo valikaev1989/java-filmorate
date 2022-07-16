@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
     private final FilmValidator filmValidator =new ValidFilm();
-    private static final Map<Integer, Film> films = new HashMap<>();
+    private final Map<Integer, Film> films = new HashMap<>();
     private static int filmId = 0;
 
     private static Integer generatedIDFilms() {
@@ -29,6 +29,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film getFilm(Integer filmId) {
+        filmValidator.setMapFilms(films);
         filmValidator.validateFilmId(filmId);
         log.info("запрошен фильм: {}", films.get(filmId).toString());
         return films.get(filmId);
@@ -36,6 +37,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
+        filmValidator.setMapFilms(films);
         filmValidator.validateFilm(film);
         film.setId(generatedIDFilms());
         films.put(film.getId(), film);
@@ -46,6 +48,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public void deleteFilm(Integer filmId) {
+        filmValidator.setMapFilms(films);
         filmValidator.validateFilmId(filmId);
         log.info("удаление фильма: {}", films.get(filmId).toString());
         films.remove(filmId);
@@ -54,6 +57,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
+        filmValidator.setMapFilms(films);
         filmValidator.validateFilm(film);
         filmValidator.validateFilmId(film.getId());
         films.put(film.getId(), film);

@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.models.Genre;
 import ru.yandex.practicum.filmorate.service.MpaService;
 import ru.yandex.practicum.filmorate.storage.validator.FilmValidator;
 
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -46,20 +47,25 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
-        try {
             filmValidator.validateFilm(film);
             filmValidator.isValidExistFilm(film);
-            SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                    .withTableName("FILMS")
-                    .usingGeneratedKeyColumns("FILM_ID");
-            film.setId((Integer) simpleJdbcInsert.executeAndReturnKey(this.filmToMap(film)));
+            Map<String, Object> keys = new SimpleJdbcInsert(jdbcTemplate)
+                    .withTableName("films")
+                    .usingColumns("name", "description",
+                            "release_date", "duration", "film_rating_id")
+                    .usingGeneratedKeyColumns("film_id")
+                    .executeAndReturnKeyHolder(Map.of("name", film.getName(),
+                            "description", film.getDescription(),
+                            "release_date", Date.valueOf(film.getReleaseDate()),
+                            "duration", film.getDuration(),
+                            "film_rating_id", film.getMpa().getId()))
+                    .getKeys();
+            film.setId((Integer) keys.get("film_id"));
+            film.setMpa(mpaService.findMpaById(film.getMpa().getId()));
             updateGenres(film);
             updateLikes(film);
             log.info("addFilm: {}", film);
             return film;
-        } catch (RuntimeException ex) {
-            throw new ValidationException(ex.getMessage() + "./n Фильм не добавлен");
-        }
     }
 
     @Override
@@ -86,7 +92,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        try {
+
             filmValidator.validateFilm(film);
             filmValidator.validateFilmId(film.getId());
             String updateFilms = "UPDATE films SET name = ?, description = ?," +
@@ -103,9 +109,7 @@ public class FilmDbStorage implements FilmStorage {
             updateGenres(film);
             updateLikes(film);
             return getFilm(film.getId());
-        } catch (RuntimeException ex) {
-            throw new ValidationException(ex.getMessage() + "./n Фильм не был изменен");
-        }
+
     }
 
     @Override
@@ -114,21 +118,9 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(sql, filmId);
     }
 
-    private Map<String, Object> filmToMap(Film film) {
-        Map<String, Object> values = new HashMap<>();
-        values.put("NAME", film.getName());
-        values.put("DESCRIPTION", film.getDescription());
-        values.put("RELEASE_DATE", film.getReleaseDate());
-        values.put("DURATION", film.getDuration());
-        if (film.getMpa() != null) {
-            values.put("FILM_RATING_ID", film.getMpa().getId());
-        }
-        return values;
-    }
-
     private void updateGenres(Film film) {
-        String deleteGenre = "DELETE FROM film_genres WHERE film_id = ?";
-        String insertGenre = "INSERT INTO film_genres (film_id, film_genre_id) VALUES (?, ?)";
+        String deleteGenre = "DELETE FROM FILMS_GENRES WHERE film_id = ?";
+        String insertGenre = "INSERT INTO FILMS_GENRES (film_id, film_genre_id) VALUES (?, ?)";
         jdbcTemplate.update(deleteGenre, film.getId());
         if (film.getGenres() != null) {
             film.getGenres().stream()
@@ -138,8 +130,8 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private void updateLikes(Film film) {
-        String deleteLikes = "DELETE FROM film_likes WHERE film_id = ?";
-        String insertLikes = "INSERT INTO film_likes (user_id, film_id) VALUES (?, ?)";
+        String deleteLikes = "DELETE FROM FILMS_LIKES WHERE film_id = ?";
+        String insertLikes = "INSERT INTO FILMS_LIKES (user_id, film_id) VALUES (?, ?)";
         jdbcTemplate.update(deleteLikes, film.getId());
         film.getIdLikeFilm()
                 .forEach(idUser -> jdbcTemplate.update(insertLikes, idUser, film.getId()));
@@ -147,17 +139,17 @@ public class FilmDbStorage implements FilmStorage {
 
     private void addGenreForFilm(Film film) {
         String sql = "SELECT name, genre_id from genres g " +
-                "LEFT JOIN film_genres fg on fg.film_genre_id = g.genre_id " +
+                "LEFT JOIN FILMS_GENRES fg on fg.film_genre_id = g.genre_id " +
                 "where film_id=?";
         HashSet<Genre> genres = new HashSet<>(jdbcTemplate.query(sql,
-                (rs, num) -> new Genre(rs.getInt("genre_id"), rs.getString("genre_name")),
+                (rs, num) -> new Genre(rs.getInt("genre_id"), rs.getString("name")),
                 film.getId())
         );
         film.setGenres(genres);
     }
 
     private void addLikeForFilm(Film film) {
-        String sqlLike = "SELECT * FROM film_likes WHERE film_id = ?";
+        String sqlLike = "SELECT * FROM FILMS_LIKES WHERE film_id = ?";
         List<Integer> idUser = jdbcTemplate.query(sqlLike, ((rs, rowNum) -> {
             if (rs.getRow() != 0) {
                 return rs.getInt("user_id");
@@ -171,18 +163,18 @@ public class FilmDbStorage implements FilmStorage {
 
     private Film uploadFilm(ResultSet rs, int rowNum) throws SQLException {
         if (rs.getRow() != 0) {
-            Film film = new Film(rs.getString("film_name"),
-                    rs.getString("film_description"),
-                    rs.getDate("film_release_date").toLocalDate(),
-                    rs.getInt("film_duration"),
-                    mpaService.findMpaById(rs.getInt("film_rating"))
+            Film film = new Film(rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getDate("release_date").toLocalDate(),
+                    rs.getInt("duration"),
+                    mpaService.findMpaById(rs.getInt("FILM_RATING_ID"))
             );
             film.setId(rs.getInt("film_id"));
             addLikeForFilm(film);
             addGenreForFilm(film);
             return film;
         } else {
-            throw new ValidationException("Нет MPA в базе");
+            throw new FilmNotFoundException("Нет MPA в базе");
         }
     }
 }

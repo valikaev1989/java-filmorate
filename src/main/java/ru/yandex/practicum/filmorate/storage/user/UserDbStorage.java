@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.storage.validator.UserValidator;
 
@@ -42,16 +43,25 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User addUser(User user)  {
-        userValidator.validateUser(user);
-
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("USERS")
-                .usingGeneratedKeyColumns("USER_ID");
-
-        user.setId((Integer) simpleJdbcInsert.executeAndReturnKey(this.userToMap(user)));
-        insertFriends(user);
-        return user;
+    public User addUser(User user) {
+        try {
+            userValidator.validateUser(user);
+            userValidator.isValidExistFilm(user);
+            Map<String, Object> keys = new SimpleJdbcInsert(jdbcTemplate)
+                    .withTableName("USERS")
+                    .usingColumns("name", "birthday", "login", "email")
+                    .usingGeneratedKeyColumns("user_id")
+                    .executeAndReturnKeyHolder(Map.of("name", user.getName(),
+                            "birthday", user.getBirthday(),
+                            "login", user.getLogin(),
+                            "email", user.getEmail()))
+                    .getKeys();
+            user.setId((Integer) keys.get("user_id"));
+            insertFriends(user);
+            return user;
+        }catch (RuntimeException ex){
+            throw new ValidationException(ex.getMessage() + "./n Фильм не добавлен");
+        }
     }
 
     @Override
@@ -71,6 +81,7 @@ public class UserDbStorage implements UserStorage {
             HashSet<Integer> follows = uploadFriends(userId, false);
             friends.addAll(follows);
             user.setIdFriendsList(friends);
+            log.info("Пользователь найден: {} {}",user,user.getIdFriendsList());
             return user;
         } else {
             throw new UserNotFoundException("Нет такого пользователя");
@@ -87,9 +98,10 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User updateUser(User user) {
         userValidator.validateUser(user);
+        userValidator.validateIdUser(user.getId());
         String updateUsers = "UPDATE users SET name = ?, login = ?, email = ?,   birthday = ?" +
                 " WHERE user_id = ?";
-        String removeFriend = "DELETE FROM FRIENDSHIP WHERE user_id = ? AND friend_id = ?";
+        String removeFriend = "DELETE FROM USERS_FRIENDS WHERE user_id = ? AND friend_id = ?";
         HashSet<Integer> onRemove = uploadFriends(user.getId(), true);
         onRemove.addAll(uploadFriends(user.getId(), false));
         HashSet<Integer> friends = user.getIdFriendsList();
@@ -99,14 +111,15 @@ public class UserDbStorage implements UserStorage {
         }
         insertFriends(user);
         jdbcTemplate.update(updateUsers,
-                user.getEmail(),
                 user.getName(),
                 user.getLogin(),
+                user.getEmail(),
                 user.getBirthday(),
                 user.getId()
         );
         return user;
     }
+
     @Override
     public void addFriends(int userId, int friendsId) {
         userValidator.validateIdUser(userId);
@@ -116,6 +129,7 @@ public class UserDbStorage implements UserStorage {
         friendsUser.add(friendsId);
         updateUser(user);
     }
+
     @Override
     public void deleteFriends(int userId, int friendsId) {
         userValidator.validateIdUser(userId);
@@ -125,6 +139,7 @@ public class UserDbStorage implements UserStorage {
         updateUser(user);
         updateUser(getUser(friendsId));
     }
+
     @Override
     public List<User> findAllFriends(Integer userId) {
         userValidator.validateIdUser(userId);
@@ -138,6 +153,7 @@ public class UserDbStorage implements UserStorage {
         }
         return friends;
     }
+
     @Override
     public List<User> findCommonFriends(int userId, int otherId) {
         userValidator.validateIdUser(userId);
@@ -168,27 +184,18 @@ public class UserDbStorage implements UserStorage {
     }
 
     private HashSet<Integer> uploadFriends(Integer userId, boolean status) {
-        String sql = "SELECT friend_id FROM friendship " +
-                "WHERE user_id = ? AND friendship_status = ?";
+        String sql = "SELECT friend_id FROM USERS_FRIENDS " +
+                "WHERE user_id = ? AND STATUS_FRIENDSHIP = ?";
         return new HashSet<>(jdbcTemplate.query(sql,
                 (rs, rowNum) -> rs.getInt("friend_id"),
                 userId, status));
-    }
-
-    public Map<String, Object> userToMap(User user) {
-        Map<String, Object> values = new HashMap<>();
-        values.put("name", user.getName());
-        values.put("login", user.getLogin());
-        values.put("email", user.getEmail());
-        values.put("birthday", user.getBirthday());
-        return values;
     }
 
     private void insertFriends(User user) {
         if (!user.getIdFriendsList().isEmpty()) {
             HashSet<Integer> friends = user.getIdFriendsList();
             for (Integer friend : friends) {
-                String sql = "INSERT INTO FRIENDSHIP (user_id, friend_id, FRIENDSHIP_STATUS) VALUES (?, ?, ?)";
+                String sql = "INSERT INTO USERS_FRIENDS (user_id, friend_id, STATUS_FRIENDSHIP) VALUES (?, ?, ?)";
                 if (getUser(friend).getIdFriendsList().contains(user.getId())) {
                     jdbcTemplate.update(sql, user.getId(), friend, true);
                 } else {

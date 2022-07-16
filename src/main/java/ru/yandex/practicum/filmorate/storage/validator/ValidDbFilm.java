@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.models.Film;
 
@@ -30,6 +31,9 @@ public class ValidDbFilm extends ValidFilm implements FilmValidator {
 
     @Override
     public void validateFilmId(Integer filmId) {
+        if(filmId<0){
+            throw new FilmNotFoundException(" filmId меньше нуля:" + filmId);
+        }
         SqlRowSet sqlRow = jdbcTemplate.queryForRowSet("SELECT * FROM films WHERE film_id = ?", filmId);
         if (!sqlRow.next()) {
             throw new ValidationException("Нет такого фильма с filmId:" + filmId);

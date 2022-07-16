@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.models.Mpa;
 
@@ -34,20 +35,22 @@ public class MpaDbStorage implements MpaStorage {
 
     @Override
     public Optional<Mpa> getMpaById(Integer id) {
-        SqlRowSet sqlRow = jdbcTemplate.queryForRowSet(SELECT_BY_ID, id);
-        if (sqlRow.next()) {
+        String sql = "SELECT * FROM film_ratings WHERE rating_id = ?";
+        SqlRowSet sqlRow = jdbcTemplate.queryForRowSet(sql , id);
+        if (sqlRow.next()){
             Mpa mpa = new Mpa(
                     sqlRow.getInt("rating_id"),
-                    sqlRow.getString("rating_name"));
+                    sqlRow.getString("name"));
+            System.out.println(mpa);
             return Optional.of(mpa);
         } else {
-            throw new ValidationException("Рейтинга фильма с id:" + id + "нет");
+            throw new FilmNotFoundException("Нет такого MPA");
         }
     }
 
     private Mpa uploadMpa(ResultSet rs, int rowNum) throws SQLException {
         if (rs.getRow() != 0) {
-            return new Mpa(rs.getInt("rating_id"), rs.getString("rating_name"));
+            return new Mpa(rs.getInt("rating_id"), rs.getString("name"));
         } else {
             throw new ValidationException("Нет такого рейтинга фильма");
         }

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.models.User;
 
@@ -24,7 +25,8 @@ public class ValidDbUser extends ValidUser implements UserValidator {
     public void validateIdUser(Integer userId) {
         SqlRowSet sqlRow = jdbcTemplate.queryForRowSet("SELECT * FROM users WHERE user_id = ?", userId);
         if (!sqlRow.next()) {
-            throw new ValidationException("Нет такого пользователя с id:" + userId);
+            log.error("Нет такого пользователя с id:" + userId);
+            throw new UserNotFoundException("Нет такого пользователя с id:" + userId);
         }
     }
 
@@ -39,10 +41,11 @@ public class ValidDbUser extends ValidUser implements UserValidator {
     @Override
     public void isValidExistFilm(User user) {
         SqlRowSet sqlRow = jdbcTemplate.queryForRowSet(
-                "SELECT * FROM USERS WHERE name = ? AND EMAIL = ?",
-                user.getName(), user.getEmail()
+                "SELECT * FROM USERS WHERE USER_ID = ? and name = ? AND EMAIL = ?",
+                user.getId(), user.getName(), user.getEmail()
         );
         if (sqlRow.next()) {
+            log.error("Этот пользователь уже существует"+ user);
             throw new ValidationException("Этот пользователь уже существует");
         }
     }

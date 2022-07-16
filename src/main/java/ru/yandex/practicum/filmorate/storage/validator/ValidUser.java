@@ -9,16 +9,23 @@ import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 @Slf4j
 @Component
 @Qualifier("ValidUser")
-public class ValidUser extends InMemoryUserStorage implements UserValidator {
+public class ValidUser implements UserValidator {
+    private Map<Integer, User> allUsers;
+
+    @Override
+    public void setMapFilms(Map<Integer, User> allUsers) {
+        this.allUsers = allUsers;
+    }
 
     @Override
     public void validateIdUser(Integer userId) {
-        if (userId == null || !getAllUsers().containsKey(userId)) {
+        if (userId == null || !allUsers.containsKey(userId)) {
             log.error("пользователь с id '{}' не найден в списке InMemoryUserStorage!", userId);
             throw new UserNotFoundException(String.format("пользователь с id '%d' не найден в InMemoryUserStorage.",
                     userId));
@@ -35,7 +42,13 @@ public class ValidUser extends InMemoryUserStorage implements UserValidator {
 
     @Override
     public void isValidExistFilm(User user) {
-
+        if (allUsers.values().stream()
+                .filter(x -> x.getLogin().equalsIgnoreCase(user.getLogin()))
+                .anyMatch(x -> x.getEmail().equalsIgnoreCase(user.getEmail()))) {
+            log.error("Пользователь '{}' с электронной почтой '{}' уже существует.",
+                    user.getLogin(), user.getEmail());
+            throw new ValidationException("This user already exists");
+        }
     }
 
     public void validateLoginUser(User user) {

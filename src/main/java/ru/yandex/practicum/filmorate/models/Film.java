@@ -30,4 +30,11 @@ public class Film {
     public void addLike(Integer userId){
         this.idLikeFilm.add(userId);
     }
+    public void addlikeId(Integer id){
+        this.idLikeFilm.add(id);
+    }
+    public void addGenre(Genre genre){
+        this.genres.add(genre);
+    }
+
 }
