@@ -31,7 +31,7 @@ public class ValidDbFilm extends ValidFilm implements FilmValidator {
 
     @Override
     public void validateFilmId(Integer filmId) {
-        if(filmId<0){
+        if (filmId < 0) {
             throw new FilmNotFoundException(" filmId меньше нуля:" + filmId);
         }
         SqlRowSet sqlRow = jdbcTemplate.queryForRowSet("SELECT * FROM films WHERE film_id = ?", filmId);

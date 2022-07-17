@@ -32,7 +32,7 @@ public class ValidFilm implements FilmValidator {
     }
 
     @Override
-    public void validateFilmId( Integer filmId) {
+    public void validateFilmId(Integer filmId) {
         if (filmId == null || !films.containsKey(filmId)) {
             log.error("Фильм с id '{}' не найден в списке InMemoryFilmStorage!", filmId);
             throw new FilmNotFoundException(String.format("Фильм с id '%d' не найден в InMemoryFilmStorage.", filmId));
@@ -68,7 +68,7 @@ public class ValidFilm implements FilmValidator {
     }
 
     @Override
-    public void isValidExistFilm( Film film) {
+    public void isValidExistFilm(Film film) {
         if (films.values().stream()
                 .filter(x -> x.getName().equalsIgnoreCase(film.getName()))
                 .anyMatch(x -> x.getReleaseDate().equals(film.getReleaseDate()))) {

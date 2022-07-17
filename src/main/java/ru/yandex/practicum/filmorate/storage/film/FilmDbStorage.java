@@ -23,6 +23,19 @@ import java.util.*;
 @Component
 @Qualifier("filmDbStorage")
 public class FilmDbStorage implements FilmStorage {
+    private static final String SELECT_ALL_FILMS = "SELECT * FROM films";
+    private static final String GET_FILM = "SELECT * FROM films WHERE film_id = ?";
+    private static final String UPDATE_FILMS = "UPDATE films SET name = ?, description = ?, release_date = ?," +
+            " duration = ?, film_rating_id = ? WHERE film_id = ?";
+    private static final String DELETE_FILM = "DELETE FROM films WHERE film_id = ?";
+    private static final String DELETE_GENRE = "DELETE FROM FILMS_GENRES WHERE film_id = ?";
+    private static final String INSERT_GENRE = "INSERT INTO FILMS_GENRES (film_id, film_genre_id) VALUES (?, ?)";
+    private static final String DELETE_LIKES = "DELETE FROM FILMS_LIKES WHERE film_id = ?";
+    private static final String INSERT_LIKES = "INSERT INTO FILMS_LIKES (user_id, film_id) VALUES (?, ?)";
+    private static final String ADD_GENRE_FILM = "SELECT name, genre_id from genres g " +
+            "LEFT JOIN FILMS_GENRES fg on fg.film_genre_id = g.genre_id " +
+            "where film_id=?";
+    private static final String ADD_LIKE_FILM = "SELECT * FROM FILMS_LIKES WHERE film_id = ?";
     private final JdbcTemplate jdbcTemplate;
     private final MpaService mpaService;
     private final FilmValidator filmValidator;
@@ -36,8 +49,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Map<Integer, Film> getAllFilms() {
-        String sql = "SELECT * FROM films";
-        List<Film> allFilms = new ArrayList<>(jdbcTemplate.query(sql, this::uploadFilm));
+        List<Film> allFilms = new ArrayList<>(jdbcTemplate.query(SELECT_ALL_FILMS, this::uploadFilm));
         Map<Integer, Film> filmsMap = new HashMap<>();
         for (Film film : allFilms) {
             filmsMap.put(film.getId(), film);
@@ -47,32 +59,31 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
-            filmValidator.validateFilm(film);
-            filmValidator.isValidExistFilm(film);
-            Map<String, Object> keys = new SimpleJdbcInsert(jdbcTemplate)
-                    .withTableName("films")
-                    .usingColumns("name", "description",
-                            "release_date", "duration", "film_rating_id")
-                    .usingGeneratedKeyColumns("film_id")
-                    .executeAndReturnKeyHolder(Map.of("name", film.getName(),
-                            "description", film.getDescription(),
-                            "release_date", Date.valueOf(film.getReleaseDate()),
-                            "duration", film.getDuration(),
-                            "film_rating_id", film.getMpa().getId()))
-                    .getKeys();
-            film.setId((Integer) keys.get("film_id"));
-            film.setMpa(mpaService.findMpaById(film.getMpa().getId()));
-            updateGenres(film);
-            updateLikes(film);
-            log.info("addFilm: {}", film);
-            return film;
+        filmValidator.validateFilm(film);
+        filmValidator.isValidExistFilm(film);
+        Map<String, Object> keys = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("films")
+                .usingColumns("name", "description",
+                        "release_date", "duration", "film_rating_id")
+                .usingGeneratedKeyColumns("film_id")
+                .executeAndReturnKeyHolder(Map.of("name", film.getName(),
+                        "description", film.getDescription(),
+                        "release_date", Date.valueOf(film.getReleaseDate()),
+                        "duration", film.getDuration(),
+                        "film_rating_id", film.getMpa().getId()))
+                .getKeys();
+        film.setId((Integer) Objects.requireNonNull(keys).get("film_id"));
+        film.setMpa(mpaService.findMpaById(film.getMpa().getId()));
+        updateGenres(film);
+        updateLikes(film);
+        log.info("addFilm: {}", film);
+        return film;
     }
 
     @Override
     public Film getFilm(Integer filmId) {
         filmValidator.validateFilmId(filmId);
-        String sql = "SELECT * FROM films WHERE film_id = ?";
-        SqlRowSet sqlRow = jdbcTemplate.queryForRowSet(sql, filmId);
+        SqlRowSet sqlRow = jdbcTemplate.queryForRowSet(GET_FILM, filmId);
         if (sqlRow.next()) {
             Film film = new Film(
                     sqlRow.getString("name"),
@@ -92,56 +103,44 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-
-            filmValidator.validateFilm(film);
-            filmValidator.validateFilmId(film.getId());
-            String updateFilms = "UPDATE films SET name = ?, description = ?," +
-                    " release_date = ?, duration = ?, film_rating_id = ?" +
-                    " WHERE film_id = ?";
-            jdbcTemplate.update(updateFilms,
-                    film.getName(),
-                    film.getDescription(),
-                    film.getReleaseDate(),
-                    film.getDuration(),
-                    film.getMpa().getId(),
-                    film.getId()
-            );
-            updateGenres(film);
-            updateLikes(film);
-            return getFilm(film.getId());
+        filmValidator.validateFilm(film);
+        filmValidator.validateFilmId(film.getId());
+        jdbcTemplate.update(UPDATE_FILMS,
+                film.getName(),
+                film.getDescription(),
+                film.getReleaseDate(),
+                film.getDuration(),
+                film.getMpa().getId(),
+                film.getId()
+        );
+        updateGenres(film);
+        updateLikes(film);
+        return getFilm(film.getId());
 
     }
 
     @Override
     public void deleteFilm(Integer filmId) {
-        String sql = "DELETE FROM films WHERE film_id = ?";
-        jdbcTemplate.update(sql, filmId);
+        jdbcTemplate.update(DELETE_FILM, filmId);
     }
 
     private void updateGenres(Film film) {
-        String deleteGenre = "DELETE FROM FILMS_GENRES WHERE film_id = ?";
-        String insertGenre = "INSERT INTO FILMS_GENRES (film_id, film_genre_id) VALUES (?, ?)";
-        jdbcTemplate.update(deleteGenre, film.getId());
+        jdbcTemplate.update(DELETE_GENRE, film.getId());
         if (film.getGenres() != null) {
             film.getGenres().stream()
                     .map(Genre::getId)
-                    .forEach(idGenre -> jdbcTemplate.update(insertGenre, film.getId(), idGenre));
+                    .forEach(idGenre -> jdbcTemplate.update(INSERT_GENRE, film.getId(), idGenre));
         }
     }
 
     private void updateLikes(Film film) {
-        String deleteLikes = "DELETE FROM FILMS_LIKES WHERE film_id = ?";
-        String insertLikes = "INSERT INTO FILMS_LIKES (user_id, film_id) VALUES (?, ?)";
-        jdbcTemplate.update(deleteLikes, film.getId());
+        jdbcTemplate.update(DELETE_LIKES, film.getId());
         film.getIdLikeFilm()
-                .forEach(idUser -> jdbcTemplate.update(insertLikes, idUser, film.getId()));
+                .forEach(idUser -> jdbcTemplate.update(INSERT_LIKES, idUser, film.getId()));
     }
 
     private void addGenreForFilm(Film film) {
-        String sql = "SELECT name, genre_id from genres g " +
-                "LEFT JOIN FILMS_GENRES fg on fg.film_genre_id = g.genre_id " +
-                "where film_id=?";
-        HashSet<Genre> genres = new HashSet<>(jdbcTemplate.query(sql,
+        HashSet<Genre> genres = new HashSet<>(jdbcTemplate.query(ADD_GENRE_FILM,
                 (rs, num) -> new Genre(rs.getInt("genre_id"), rs.getString("name")),
                 film.getId())
         );
@@ -149,8 +148,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private void addLikeForFilm(Film film) {
-        String sqlLike = "SELECT * FROM FILMS_LIKES WHERE film_id = ?";
-        List<Integer> idUser = jdbcTemplate.query(sqlLike, ((rs, rowNum) -> {
+        List<Integer> idUser = jdbcTemplate.query(ADD_LIKE_FILM, ((rs, rowNum) -> {
             if (rs.getRow() != 0) {
                 return rs.getInt("user_id");
             } else {

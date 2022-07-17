@@ -20,7 +20,7 @@ import java.util.Optional;
 @Qualifier("MpaDbStorage")
 public class MpaDbStorage implements MpaStorage {
     private static final String SELECT_ALL = "SELECT * FROM FILM_RATINGS";
-    private static final String SELECT_BY_ID = "SELECT * FROM FILM_RATINGS WHERE rating_id = ?";
+    private static final String SELECT_MPA = "SELECT * FROM FILM_RATINGS WHERE rating_id = ?";
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -35,8 +35,7 @@ public class MpaDbStorage implements MpaStorage {
 
     @Override
     public Optional<Mpa> getMpaById(Integer id) {
-        String sql = "SELECT * FROM film_ratings WHERE rating_id = ?";
-        SqlRowSet sqlRow = jdbcTemplate.queryForRowSet(sql , id);
+        SqlRowSet sqlRow = jdbcTemplate.queryForRowSet(SELECT_MPA , id);
         if (sqlRow.next()){
             Mpa mpa = new Mpa(
                     sqlRow.getInt("rating_id"),

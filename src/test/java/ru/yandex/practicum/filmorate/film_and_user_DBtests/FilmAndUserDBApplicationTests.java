@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.film;
+package ru.yandex.practicum.filmorate.film_and_user_DBtests;
 
 
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureTestDatabase
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class FilmoRateApplicationTests {
+class FilmAndUserDBApplicationTests {
     private final UserService userStorage;
     private final FilmService filmStorage;
 
@@ -34,8 +34,8 @@ class FilmoRateApplicationTests {
         assertEquals(user, userStorage.getUser(user.getId()));
         Film film = new Film("film1", "some things", LocalDate.of(1999, 6, 15), 165, new Mpa(2, null));
         HashSet<Genre> genres = new HashSet<>();
-        genres.add(new Genre(3,null));
-        genres.add(new Genre(6,null));
+        genres.add(new Genre(3, "Мультфильм"));
+        genres.add(new Genre(6, "Боевик"));
         film.setGenres(genres);
         filmStorage.addFilm(film);
         System.out.println(filmStorage.getFilm(1));

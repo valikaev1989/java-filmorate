@@ -45,7 +45,7 @@ public class ValidDbUser extends ValidUser implements UserValidator {
                 user.getId(), user.getName(), user.getEmail()
         );
         if (sqlRow.next()) {
-            log.error("Этот пользователь уже существует"+ user);
+            log.error("Этот пользователь уже существует" + user);
             throw new ValidationException("Этот пользователь уже существует");
         }
     }
