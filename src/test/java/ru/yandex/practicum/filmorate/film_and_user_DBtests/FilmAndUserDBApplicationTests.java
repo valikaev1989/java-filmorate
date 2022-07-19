@@ -38,8 +38,11 @@ class FilmAndUserDBApplicationTests {
         userStorage.addUser(user3);
         userStorage.addUser(user4);
         userStorage.addUser(user5);
-
-        assertEquals(user, userStorage.getUser(user.getId()));
+        assertTrue(userStorage.getAllUsers().containsKey(user.getId()));
+        assertTrue(userStorage.getAllUsers().containsKey(user2.getId()));
+        assertTrue(userStorage.getAllUsers().containsKey(user3.getId()));
+        assertTrue(userStorage.getAllUsers().containsKey(user4.getId()));
+        assertTrue(userStorage.getAllUsers().containsKey(user5.getId()));
 
         Film film = new Film("film1", "some things", LocalDate.of(1980, 6, 15), 165, new Mpa(2, null));
         HashSet<Genre> genres = new HashSet<>();
@@ -48,14 +51,13 @@ class FilmAndUserDBApplicationTests {
         genres.add(new Genre(2, null));
         film.setGenres(genres);
         filmStorage.addFilm(film);
+        assertTrue(filmStorage.getAllFilms().containsKey(film.getId()));
 
         Film film2 = new Film("film1", "some things", LocalDate.of(2000, 6, 15), 165, new Mpa(4, null));
         HashSet<Genre> genres2 = new HashSet<>();
         genres2.add(new Genre(5, null));
         film.setGenres(genres2);
         filmStorage.addFilm(film2);
-        Film film1 = filmStorage.getFilm(film.getId());
-        assertEquals(film1, filmStorage.getFilm(1));
 
         filmStorage.addLike(film.getId(), user.getId());
         filmStorage.addLike(film.getId(), user2.getId());
@@ -76,7 +78,7 @@ class FilmAndUserDBApplicationTests {
         System.out.println(filmStorage.getFilm(1));
         Film film2 = new Film("Fake", "some things", LocalDate.of(1999, 6, 15), 165, new Mpa(2, "PG"));
         film2.setId(1);
-        film2.addGenre(new Genre(6, "Боевик"));
+        film2.setGenres(filmStorage.getFilm(film.getId()).getGenres());
         filmStorage.updateFilm(film2);
         System.out.println(filmStorage.getFilm(1));
         System.out.println(film2);

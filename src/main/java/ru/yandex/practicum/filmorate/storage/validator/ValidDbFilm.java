@@ -43,8 +43,8 @@ public class ValidDbFilm extends ValidFilm implements FilmValidator {
     @Override
     public void isValidExistFilm(Film film) {
         SqlRowSet sqlRow = jdbcTemplate.queryForRowSet(
-                "SELECT * FROM films WHERE name = ? AND release_date = ?",
-                film.getName(), film.getReleaseDate()
+                "SELECT * FROM films WHERE film_id =? and name = ? AND release_date = ?",
+               film.getId(), film.getName(), film.getReleaseDate()
         );
         if (sqlRow.next()) {
             throw new ValidationException("Этот фильм уже существует");
