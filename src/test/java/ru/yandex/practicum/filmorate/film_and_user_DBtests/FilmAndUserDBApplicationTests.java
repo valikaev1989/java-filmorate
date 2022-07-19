@@ -19,7 +19,6 @@ import java.time.LocalDate;
 import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
