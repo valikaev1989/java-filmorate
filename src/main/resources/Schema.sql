@@ -58,7 +58,6 @@ create table IF NOT EXISTS FILMS_LIKES
     constraint FILMS_LIKES_USERS_USER_ID_FK
         foreign key (USER_ID) references USERS
 );
-
 create table IF NOT EXISTS USERS_FRIENDS
 (
     USER_ID           INTEGER,
