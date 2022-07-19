@@ -14,7 +14,6 @@ import java.util.*;
 public class UserService {
     private final UserStorage userStorage;
 
-
     @Autowired
     public UserService(@Qualifier("UserDbStorage") UserStorage storage) {
         this.userStorage = storage;

@@ -35,8 +35,8 @@ public class MpaDbStorage implements MpaStorage {
 
     @Override
     public Optional<Mpa> getMpaById(Integer id) {
-        SqlRowSet sqlRow = jdbcTemplate.queryForRowSet(SELECT_MPA , id);
-        if (sqlRow.next()){
+        SqlRowSet sqlRow = jdbcTemplate.queryForRowSet(SELECT_MPA, id);
+        if (sqlRow.next()) {
             Mpa mpa = new Mpa(
                     sqlRow.getInt("rating_id"),
                     sqlRow.getString("name"));

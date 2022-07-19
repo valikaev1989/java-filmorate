@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.Genre;
 import ru.yandex.practicum.filmorate.models.Mpa;
@@ -21,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmAndUserDBApplicationTests {
     private final UserService userStorage;
@@ -29,17 +27,45 @@ class FilmAndUserDBApplicationTests {
 
     @Test
     public void testAddFilmAndUser() {
-        User user = new User("user1", "u1", "u1@yandex.ru", LocalDate.of(2001, 5, 20));
+        User user = new User("user1", "u1", "u1@yandex.ru", LocalDate.of(2000, 5, 20));
+        User user2 = new User("", "u2", "u2@yandex.ru", LocalDate.of(1995, 5, 20));
+        User user3 = new User("user3", "u3", "u3@yandex.ru", LocalDate.of(2005, 5, 20));
+        User user4 = new User("user4", "u4", "u4@yandex.ru", LocalDate.of(1008, 5, 20));
+        User user5 = new User("", "u5", "u5@yandex.ru", LocalDate.of(2010, 5, 20));
+
         userStorage.addUser(user);
+        userStorage.addUser(user2);
+        userStorage.addUser(user3);
+        userStorage.addUser(user4);
+        userStorage.addUser(user5);
+
         assertEquals(user, userStorage.getUser(user.getId()));
-        Film film = new Film("film1", "some things", LocalDate.of(1999, 6, 15), 165, new Mpa(2, null));
+
+        Film film = new Film("film1", "some things", LocalDate.of(1980, 6, 15), 165, new Mpa(2, null));
         HashSet<Genre> genres = new HashSet<>();
-        genres.add(new Genre(3, "Мультфильм"));
-        genres.add(new Genre(6, "Боевик"));
+        genres.add(new Genre(3, null));
+        genres.add(new Genre(6, null));
+        genres.add(new Genre(2, null));
         film.setGenres(genres);
         filmStorage.addFilm(film);
-        System.out.println(filmStorage.getFilm(1));
-        assertEquals(film, filmStorage.getFilm(1));
+
+        Film film2 = new Film("film1", "some things", LocalDate.of(2000, 6, 15), 165, new Mpa(4, null));
+        HashSet<Genre> genres2 = new HashSet<>();
+        genres2.add(new Genre(5, null));
+        film.setGenres(genres2);
+        filmStorage.addFilm(film2);
+        Film film1 = filmStorage.getFilm(film.getId());
+        assertEquals(film1, filmStorage.getFilm(1));
+
+        filmStorage.addLike(film.getId(), user.getId());
+        filmStorage.addLike(film.getId(), user2.getId());
+        filmStorage.addLike(film.getId(), user3.getId());
+        filmStorage.addLike(film2.getId(), user5.getId());
+        Film film3 = filmStorage.getFilm(film.getId());
+        Film film4 = filmStorage.getFilm(film2.getId());
+        assertEquals(3, film3.getIdLikeFilm().size());
+        assertEquals(1, film4.getIdLikeFilm().size());
+        assertEquals(film3, filmStorage.getFilmsByCountLikes(1).get(0));
     }
 
     @Test

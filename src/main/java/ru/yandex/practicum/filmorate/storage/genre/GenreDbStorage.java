@@ -12,12 +12,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+
 @Slf4j
 @Component
 public class GenreDbStorage implements GenreStorage {
     private static final String SELECT_ALL = "SELECT * FROM GENRES";
-    private static final String SELECT_ById = "SELECT * FROM GENRES WHERE GENRE_ID = ?";
+    private static final String SELECT_BY_ID = "SELECT * FROM GENRES WHERE GENRE_ID = ?";
     private final JdbcTemplate jdbcTemplate;
+
     @Autowired
     public GenreDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -30,12 +32,12 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Optional<Genre> getGenreById(Integer id) {
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(SELECT_ById, id);
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(SELECT_BY_ID, id);
         if (rowSet.next()) {
             return Optional.of(new Genre(rowSet.getInt("genre_id"),
                     rowSet.getString("name")));
         } else {
-            log.error("getGenreById:"+ "Жанра в базе с id " + id + "нет");
+            log.error("getGenreById:" + "Жанра в базе с id " + id + "нет");
             throw new FilmNotFoundException("Жанра в базе с id " + id + "нет");
         }
     }

@@ -15,5 +15,4 @@ public interface FilmStorage {
     Map<Integer, Film> getAllFilms();
 
     Film getFilm(Integer filmId);
-
 }
