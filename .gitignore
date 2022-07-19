@@ -1,11 +1,19 @@
+*.class
+*.log
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+out/
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-*/db
-TestClass.java
-
 
 ### STS ###
 .apt_generated
@@ -34,3 +42,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### My files ###
+/db
+TestClass.java
