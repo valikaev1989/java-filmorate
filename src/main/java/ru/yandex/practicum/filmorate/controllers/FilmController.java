@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.exception.IncorrectCountException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
 import java.util.List;
@@ -17,47 +16,46 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/films")
 public class FilmController {
-    private final FilmStorage filmStorage;
     private final FilmService filmService;
 
     @Autowired
-    public FilmController(FilmStorage filmStorage, FilmService filmService) {
-        this.filmStorage = filmStorage;
+    public FilmController(FilmService filmService) {
         this.filmService = filmService;
     }
 
     @GetMapping
     public Collection<Film> getAllFilms() {
-        return filmStorage.getAllFilms().values();
+        log.info("findAll");
+        return filmService.getAllFilms().values();
     }
 
     @PostMapping
     public Film addFilm(@RequestBody Film film) throws ValidationException {
-        return filmStorage.addFilm(film);
+        return filmService.addFilm(film);
     }
 
     @PutMapping
     public Film updateFilm(@RequestBody Film film) throws ValidationException {
-        return filmStorage.updateFilm(film);
+        return filmService.updateFilm(film);
     }
 
     @DeleteMapping("/{filmId}")
-    public void deleteFilm(@PathVariable("filmId") Long filmId) throws ValidationException {
-        filmStorage.deleteFilm(filmId);
+    public void deleteFilm(@PathVariable("filmId") Integer filmId) throws ValidationException {
+        filmService.deleteFilm(filmId);
     }
 
     @GetMapping("/{filmId}")
-    public Film getFilm(@PathVariable Long filmId) {
-        return filmStorage.getFilm(filmId);
+    public Film getFilm(@PathVariable Integer filmId) {
+        return filmService.getFilm(filmId);
     }
 
     @PutMapping("/{filmId}/like/{userId}")
-    public Film addLike(@PathVariable Long filmId, @PathVariable Long userId) {
+    public Film addLike(@PathVariable Integer filmId, @PathVariable Integer userId) {
         return filmService.addLike(filmId, userId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
-    public void deleteLike(@PathVariable Long filmId, @PathVariable Long userId) {
+    public void deleteLike(@PathVariable Integer filmId, @PathVariable Integer userId) {
         filmService.deleteLike(filmId, userId);
     }
 

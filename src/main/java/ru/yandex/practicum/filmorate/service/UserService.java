@@ -2,75 +2,65 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 @Slf4j
 public class UserService {
     private final UserStorage userStorage;
-    private final Map<Long, User> users;
-
 
     @Autowired
-    public UserService(UserStorage storage) {
+    public UserService(@Qualifier("UserDbStorage") UserStorage storage) {
         this.userStorage = storage;
-        this.users = userStorage.getAllUsers();
     }
 
-    public User addFriend(Long userId, Long friendId) {
-        checkUserContainsInMap(userId);
-        checkUserContainsInMap(friendId);
-        User user = users.get(userId);
-        User friend = users.get(friendId);
-        HashSet<Long> userFriends = user.getIdFriendsList();
-        HashSet<Long> friendFriends = friend.getIdFriendsList();
-        userFriends.add(friendId);
-        friendFriends.add(userId);
-        return friend;
+    public Map<Integer, User> getAllUsers() {
+        return userStorage.getAllUsers();
     }
 
-    public void deleteFriend(Long userId, Long friendId) {
-        checkUserContainsInMap(userId);
-        checkUserContainsInMap(friendId);
-        users.get(userId).getIdFriendsList().remove(friendId);
-        users.get(friendId).getIdFriendsList().remove(userId);
+    public User addUser(User user) {
+        User user1 = userStorage.addUser(user);
+        log.info("addUser: {}", user1);
+        return user1;
     }
 
-    public List<User> getFriends(Long userId) {
-        checkUserContainsInMap(userId);
-        return users.get(userId).getIdFriendsList().stream()
-                .map(users::get)
-                .collect(Collectors.toList());
+    public User getUser(Integer userId) {
+        User user = userStorage.getUser(userId);
+        log.info("getUser: {}", user);
+        return user;
     }
 
-    public List<User> getCommonFriends(Long userId, Long otherId) {
-        checkUserContainsInMap(userId);
-        checkUserContainsInMap(otherId);
-        User user = users.get(userId);
-        User otherUser = users.get(otherId);
-        Set<Long> userFriends = user.getIdFriendsList();
-        Set<Long> otherUserFriends = otherUser.getIdFriendsList();
-        return userFriends.stream()
-                .filter(otherUserFriends::contains)
-                .map(i -> users.get(i))
-                .collect(Collectors.toList());
+    public void deleteUser(Integer userId) {
+        userStorage.deleteUser(userId);
+        log.info("deleteUser: {}", userId);
     }
 
-    private void checkUserContainsInMap(Long userId) {
-        if (!(users.containsKey(userId))) {
-            log.error("Пользователь с id '{}' не найден в UserService.", userId);
-            throw new UserNotFoundException(
-                    String.format("Пользователь с id:'%d' не найден в UserService.", userId)
-            );
-        }
+    public User updateUser(User user) {
+        User user1 = userStorage.updateUser(user);
+        log.info("updateUser: {}", user1);
+        return user1;
+    }
+
+    public void addFriend(Integer userId, Integer friendId) {
+        userStorage.addFriends(userId, friendId);
+        log.info("addFriend: {}" + userStorage.getUser(userId).getIdFriendsList().contains(friendId), friendId);
+    }
+
+    public void deleteFriends(int userId, int friendId) {
+        userStorage.deleteFriends(userId, friendId);
+        log.info("deleteFriends: {}" + !userStorage.getUser(userId).getIdFriendsList().contains(friendId), friendId);
+    }
+
+    public List<User> getAllFriends(Integer userId) {
+        return userStorage.findAllFriends(userId);
+    }
+
+    public List<User> getCommonFriends(int userId, int otherId) {
+        return userStorage.findCommonFriends(userId, otherId);
     }
 }
