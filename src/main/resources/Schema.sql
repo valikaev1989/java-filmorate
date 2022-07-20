@@ -1,6 +1,6 @@
 create table IF NOT EXISTS FILM_RATINGS
 (
-    RATING_ID   INTEGER auto_increment,
+    RATING_ID   INTEGER,
     NAME CHARACTER VARYING(50),
     constraint FILMS_RATINGS_PK
         primary key (RATING_ID)
@@ -22,7 +22,7 @@ create table IF NOT EXISTS FILMS
 
 create table IF NOT EXISTS GENRES
 (
-    GENRE_ID   INTEGER auto_increment,
+    GENRE_ID   INTEGER,
     NAME CHARACTER VARYING(50),
     constraint FILMS_GENRES_PK
         primary key (GENRE_ID)
