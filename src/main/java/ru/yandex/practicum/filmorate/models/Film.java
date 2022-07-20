@@ -10,25 +10,28 @@ import java.util.HashSet;
 @AllArgsConstructor
 @Builder
 public class Film {
-    private Long id;
+    private Integer id;
     private String name;
     private String description;
     private LocalDate releaseDate;
     private Integer duration;
-    private HashSet<Long> idLikeFilm = new HashSet<>();
+    private HashSet<Integer> idLikeFilm = new HashSet<>();
+    private HashSet<Genre> genres = new HashSet<>();
+    private Mpa mpa;
 
-    public Film(String name, String description, LocalDate releaseDate, Integer duration) {
+    public Film(String name, String description, LocalDate releaseDate, Integer duration, Mpa mpa) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        this.mpa = mpa;
     }
 
-    public Film(Long id, String name, String description, LocalDate releaseDate, Integer duration) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
+    public void addLike(Integer userId) {
+        this.idLikeFilm.add(userId);
+    }
+
+    public void addGenre(Genre genre) {
+        this.genres.add(genre);
     }
 }
